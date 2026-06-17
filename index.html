@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Portfólio de Chumbadas e Jig Heads | Chumbada Oficial</title>
+<title>Catálogo de Chumbadas e Jig Heads com Preços | Chumbada Oficial</title>
 <style>
 :root {
   --bg:#f5f7f8; --ink:#121416; --muted:#66717b; --card:#ffffff; --line:#e1e6ea;
@@ -57,14 +57,16 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 .footer{background:#101418;color:#d7e0e7;padding:34px 22px;text-align:center}.footer b{color:#fff}
 @media(max-width:920px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.tools{grid-template-columns:1fr}}
 @media(max-width:620px){.grid{grid-template-columns:1fr}.hero{padding-top:34px}.thumb{height:210px}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:24px}}
+.price-row{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--orange)}
+.price-tag{background:var(--soft);color:#bc4d00;border:1px solid #ffd9bb;border-radius:8px;padding:4px 8px;font-size:13px;font-weight:900}
 </style>
 </head>
 <body>
 <header class="hero">
   <div class="wrap">
     <div class="brand"><div class="logoMark">CO</div><span>Chumbada Oficial</span></div>
-    <h1>Portfólio de Chumbadas e Jig Heads</h1>
-    <p class="lead">Uma vitrine sem preços para lojistas e equipe comercial conferirem modelos, pesos, cores e opções da linha Chumbada Oficial.</p>
+    <h1>Catálogo de Chumbadas e Jig Heads com Preços</h1>
+    <p class="lead">Uma vitrine completa com preços para lojistas e equipe comercial conferirem modelos, pesos, cores, opções e valores da linha Chumbada Oficial.</p>
     <div class="heroActions"><a class="btn" href="#catalogo">Ver catálogo</a><a class="btn dark" href="#jigheads">Ir para Jig Heads</a></div>
     <div class="stats">
       <div class="stat"><b id="sTotal">0</b><span>modelos</span></div>
@@ -172,6 +174,20 @@ function kitContentItems(p){
   if(downShot) return [`Chumbadas de ${downShot[1].trim()} gramas, ${downShot[2].trim()}.`];
   return [];
 }
+function formatPrice(val) {
+  if (!val) return '-';
+  if (typeof val === 'number') {
+    return 'R$ ' + val.toFixed(2).replace('.', ',');
+  }
+  let s = String(val).trim();
+  if (s.startsWith('R$')) return s;
+  let num = parseFloat(s.replace(',', '.'));
+  if (!isNaN(num)) {
+    return 'R$ ' + num.toFixed(2).replace('.', ',');
+  }
+  return s;
+}
+
 function tableRows(p){
   const rows = p.variants.map(v=>({
     ...v,
@@ -179,29 +195,30 @@ function tableRows(p){
   }));
   if(p.category==='Kits'){
     const items = kitContentItems(p);
+    let contentTable = '';
     if(items.length){
       const body = items.map(item=>`<tr><td>${esc(item)}</td></tr>`).join('');
-      return `<div class="tableWrap"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody>${body}</tbody></table></div>`;
+      contentTable = `<div class="tableWrap"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody>${body}</tbody></table></div>`;
     }
     const cols = Array.from(new Set(rows.flatMap(v=>v.opts.map(o=>o.name))));
-    if(cols.length){
-      const head = cols.map(c=>`<th>${esc(c)}</th>`).join('');
-      const body = rows.map(v=>{
-        const map = Object.fromEntries(v.opts.map(o=>[o.name,o.value]));
-        return `<tr>${cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('')}</tr>`;
-      }).join('');
-      return `<div class="tableWrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
-    }
-    return `<div class="tableWrap"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody><tr><td>${esc(p.description||'Kit de chumbadas')}</td></tr></tbody></table></div>`;
+    const showOpts = cols.length > 0;
+    const head = (showOpts ? cols.map(c=>`<th>${esc(c)}</th>`).join('') : '') + '<th>SKU</th><th>Preço</th>';
+    const body = rows.map(v=>{
+      const map = Object.fromEntries(v.opts.map(o=>[o.name,o.value]));
+      return `<tr>${showOpts ? cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('') : ''}<td>${esc(v.sku||'-')}</td><td>${esc(formatPrice(v.price))}</td></tr>`;
+    }).join('');
+    const priceTable = `<div class="tableWrap" style="margin-top:8px;"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+    return contentTable + priceTable;
   }
   const cols = Array.from(new Set(rows.flatMap(v=>v.opts.map(o=>o.name))));
-  const head = cols.map(c=>`<th>${esc(c)}</th>`).join('') + '<th>SKU</th>';
+  const head = cols.map(c=>`<th>${esc(c)}</th>`).join('') + '<th>SKU</th><th>Preço</th>';
   const body = rows.map(v=>{
     const map = Object.fromEntries(v.opts.map(o=>[o.name,o.value]));
-    return `<tr>${cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('')}<td>${esc(v.sku||'-')}</td></tr>`;
+    return `<tr>${cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('')}<td>${esc(v.sku||'-')}</td><td>${esc(formatPrice(v.price))}</td></tr>`;
   }).join('');
   return `<div class="tableWrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
+
 function card(p){
   const id = p.category==='Jig Heads'?' id="jigheads"':'';
   const weights = p.weights && p.weights.length ? p.weights : (p.hooks || []);
@@ -211,11 +228,32 @@ function card(p){
     <div class="availabilityRow"><b>Cores</b><div class="swatches">${getLeadColors(p).map(c=>`<span class="swatch" style="--swatch:${c.color}">${esc(c.name)}</span>`).join('')}</div></div>
     ${optionRow}
   </div>` : '';
+  
+  const prices = p.variants.map(v => {
+    if (!v.price) return null;
+    let s = String(v.price).replace('R$', '').replace(/\s+/g, '');
+    s = s.replace(/\./g, '').replace(',', '.');
+    let num = parseFloat(s);
+    return isNaN(num) ? null : num;
+  }).filter(v => v !== null);
+  
+  let priceStr = '';
+  if (prices.length > 0) {
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    if (minPrice === maxPrice) {
+      priceStr = `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')}</span></div>`;
+    } else {
+      priceStr = `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')} - R$ ${maxPrice.toFixed(2).replace('.', ',')}</span></div>`;
+    }
+  }
+
   return `<article class="card"${id}>
     <div class="thumb">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`:`<div class="noimg">Sem imagem</div>`}</div>
     <div class="body">
       <div class="kicker"><span class="badge">${esc(p.category)}</span><span class="varcount">${p.variantCount} variações</span></div>
       <h3>${esc(p.title)}</h3>
+      ${priceStr}
       ${descriptionBlock(p.description)}
       ${availability}
       <div class="weightLine">${chips(weights)}</div>
