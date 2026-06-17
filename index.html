@@ -59,6 +59,17 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 @media(max-width:620px){.grid{grid-template-columns:1fr}.hero{padding-top:34px}.thumb{height:210px}.stats{grid-template-columns:1fr 1fr}.stat b{font-size:24px}}
 .price-row{margin-top:8px;display:flex;align-items:center;gap:6px;font-size:15px;font-weight:800;color:var(--orange)}
 .price-tag{background:var(--soft);color:#bc4d00;border:1px solid #ffd9bb;border-radius:8px;padding:4px 8px;font-size:13px;font-weight:900}
+.vars-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.var-row{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#fbfcfd;border:1px solid #edf1f3;border-radius:14px;gap:8px}
+.var-details{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.var-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.var-sku{font-size:11px;color:var(--muted);font-family:monospace}
+.var-price{font-size:14px;font-weight:800;color:var(--orange)}
+.var-badge{font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px}
+.var-badge.option{background:#eef2f5;color:#1d2730}
+.var-badge.weight{background:#111;color:#fff}
+.var-color-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#26313a;background:#fff;border:1px solid var(--line);padding:3px 8px;border-radius:6px}
+.var-color-badge:before{content:"";width:10px;height:10px;border-radius:50%;background:var(--color-dot);border:1px solid rgba(0,0,0,.15)}
 </style>
 </head>
 <body>
@@ -188,35 +199,89 @@ function formatPrice(val) {
   return s;
 }
 
-function tableRows(p){
-  const rows = p.variants.map(v=>({
+function getColorHex(name) {
+  const map = {
+    'Natural': '#708090',
+    'Amarelo': '#FFD700',
+    'Laranja': '#FF8C00',
+    'Preto': '#2a2a2a',
+    'Vermelho': '#FF0000',
+    'Azul': '#0000FF',
+    'Verde': '#008000',
+    'Rosa': '#FFC0CB',
+    'Branco': '#FFFFFF',
+    'Luminoso': '#ADFF2F'
+  };
+  return map[name] || '#708090';
+}
+
+function variationList(p) {
+  const rows = p.variants.map(v => ({
     ...v,
-    opts:(v.opts||[]).filter(o=>!(normalizeText(o.name)==='title' && normalizeText(o.value)==='default title'))
+    opts: (v.opts || []).filter(o => !(normalizeText(o.name) === 'title' && normalizeText(o.value) === 'default title'))
   }));
-  if(p.category==='Kits'){
+  
+  if (p.category === 'Kits') {
     const items = kitContentItems(p);
     let contentTable = '';
-    if(items.length){
-      const body = items.map(item=>`<tr><td>${esc(item)}</td></tr>`).join('');
-      contentTable = `<div class="tableWrap"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody>${body}</tbody></table></div>`;
+    if (items.length) {
+      const body = items.map(item => `<tr><td>${esc(item)}</td></tr>`).join('');
+      contentTable = `<div class="tableWrap" style="margin-bottom: 12px;"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody>${body}</tbody></table></div>`;
     }
-    const cols = Array.from(new Set(rows.flatMap(v=>v.opts.map(o=>o.name))));
-    const showOpts = cols.length > 0;
-    const head = (showOpts ? cols.map(c=>`<th>${esc(c)}</th>`).join('') : '') + '<th>SKU</th><th>Preço</th>';
-    const body = rows.map(v=>{
-      const map = Object.fromEntries(v.opts.map(o=>[o.name,o.value]));
-      return `<tr>${showOpts ? cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('') : ''}<td>${esc(v.sku||'-')}</td><td>${esc(formatPrice(v.price))}</td></tr>`;
+    
+    const varRows = rows.map(v => {
+      const optionBadges = v.opts
+        .filter(o => o.name !== 'Cor')
+        .map(o => `<span class="var-badge option">${esc(o.value)}</span>`)
+        .join('');
+        
+      const colorOpt = v.opts.find(o => o.name === 'Cor');
+      const colorBadge = colorOpt 
+        ? `<span class="var-color-badge" style="--color-dot: ${getColorHex(colorOpt.value)}">${esc(colorOpt.value)}</span>` 
+        : '';
+        
+      return `
+        <div class="var-row">
+          <div class="var-details">
+            ${optionBadges}
+            ${colorBadge}
+          </div>
+          <div class="var-meta">
+            <span class="var-sku">SKU: ${esc(v.sku || '-')}</span>
+            <span class="var-price">${esc(formatPrice(v.price))}</span>
+          </div>
+        </div>
+      `;
     }).join('');
-    const priceTable = `<div class="tableWrap" style="margin-top:8px;"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
-    return contentTable + priceTable;
+    
+    return contentTable + `<div class="vars-list">${varRows}</div>`;
   }
-  const cols = Array.from(new Set(rows.flatMap(v=>v.opts.map(o=>o.name))));
-  const head = cols.map(c=>`<th>${esc(c)}</th>`).join('') + '<th>SKU</th><th>Preço</th>';
-  const body = rows.map(v=>{
-    const map = Object.fromEntries(v.opts.map(o=>[o.name,o.value]));
-    return `<tr>${cols.map(c=>`<td>${esc(map[c]||'-')}</td>`).join('')}<td>${esc(v.sku||'-')}</td><td>${esc(formatPrice(v.price))}</td></tr>`;
+  
+  const varRows = rows.map(v => {
+    const weightOpt = v.opts.find(o => normalizeText(o.name).includes('peso'));
+    const colorOpt = v.opts.find(o => o.name === 'Cor');
+    const otherOpts = v.opts.filter(o => o !== weightOpt && o !== colorOpt);
+    
+    const weightBadge = weightOpt ? `<span class="var-badge weight">${esc(weightOpt.value)}</span>` : '';
+    const colorBadge = colorOpt ? `<span class="var-color-badge" style="--color-dot: ${getColorHex(colorOpt.value)}">${esc(colorOpt.value)}</span>` : '';
+    const otherBadges = otherOpts.map(o => `<span class="var-badge option">${esc(o.value)}</span>`).join('');
+    
+    return `
+      <div class="var-row">
+        <div class="var-details">
+          ${otherBadges}
+          ${weightBadge}
+          ${colorBadge}
+        </div>
+        <div class="var-meta">
+          <span class="var-sku">SKU: ${esc(v.sku || '-')}</span>
+          <span class="var-price">${esc(formatPrice(v.price))}</span>
+        </div>
+      </div>
+    `;
   }).join('');
-  return `<div class="tableWrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  
+  return `<div class="vars-list">${varRows}</div>`;
 }
 
 function card(p){
@@ -257,7 +322,7 @@ function card(p){
       ${descriptionBlock(p.description)}
       ${availability}
       <div class="weightLine">${chips(weights)}</div>
-      <details><summary>Ver pesos e variações</summary>${tableRows(p)}</details>
+      <details><summary>Ver pesos e variações</summary>${variationList(p)}</details>
     </div>
   </article>`;
 }
