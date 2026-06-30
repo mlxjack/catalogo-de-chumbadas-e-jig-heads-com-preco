@@ -164,7 +164,12 @@ function normalizeText(s){return String(s||'').normalize('NFD').replace(/[\u0300
 function getLeadColors(p){
   const hay = normalizeText([p.title,p.handle,p.tags].join(' '));
   const override = LEAD_COLOR_OVERRIDES.find(rule=>rule.terms.some(term=>hay.includes(term)));
-  return override ? [...LEAD_COLORS,...override.colors] : LEAD_COLORS;
+  const allColors = override ? [...LEAD_COLORS,...override.colors] : LEAD_COLORS;
+  const colorsInVariants = new Set(p.variants.flatMap(v => v.opts.filter(o => o.name === 'Cor').map(o => o.value)));
+  if (colorsInVariants.size > 0) {
+    return allColors.filter(c => colorsInVariants.has(c.name));
+  }
+  return allColors;
 }
 function getMountOptions(p){
   const hay = normalizeText([p.title,p.handle,p.tags].join(' '));
