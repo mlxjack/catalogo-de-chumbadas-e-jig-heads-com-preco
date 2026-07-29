@@ -75,6 +75,15 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 .group-pills{display:flex;flex-wrap:wrap;gap:6px}
 .group-pill{font-size:12px;background:#fff;border:1px solid var(--line);color:#26313a;padding:5px 8px;border-radius:8px;font-weight:500;cursor:help}
 .group-pill b{color:var(--orange);font-weight:800;margin-left:4px}
+.focusBanner{display:none;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,var(--soft),#fff);border:1px solid #ffd9bb;border-radius:20px;padding:14px 18px;margin-bottom:20px}
+.focusBanner.on{display:flex}
+.focusBanner .focusInfo{display:flex;align-items:center;gap:12px;min-width:0}
+.focusBanner .focusInfo img{width:46px;height:46px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;flex:none}
+.focusBanner p{margin:0;font-weight:800;color:#8a3a00;font-size:14px}
+.focusBanner p small{display:block;font-weight:800;color:#b0784f;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.focusBanner button{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:#111;font-family:inherit;font-size:13px;font-weight:900;border:0;border-radius:999px;padding:11px 17px;cursor:pointer;flex:none}
+.focusBanner button:hover{background:var(--orange2)}
+.card.focused{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,0,.22),0 18px 45px rgba(20,32,44,.12)}
 </style>
 </head>
 <body>
@@ -105,6 +114,7 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 </nav>
 <main id="catalogo">
   <div class="sectionHead"><div><h2>Catálogo completo</h2><div class="count" id="count"></div></div></div>
+  <div class="focusBanner" id="focusBanner"><div class="focusInfo" id="focusInfo"></div><button type="button" id="focusClear">Ver catálogo completo</button></div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">Nenhum modelo encontrado com esse filtro.</div>
 </main>
@@ -382,6 +392,7 @@ function card(p){
   </article>`;
 }
 function render(){
+  if(focusedHandle) return renderFocused();
   const term = normalizeText(q.value.trim());
   const filtered = PRODUCTS.filter(p=>{
     const byCat = activeFilter==='Todos' || p.category===activeFilter;
@@ -395,10 +406,58 @@ function render(){
 }
 document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); activeFilter=btn.dataset.filter; render();
+  btn.classList.add('active'); activeFilter=btn.dataset.filter; clearFocus(); render();
 }));
-q.addEventListener('input', render);
-render();
+let focusedHandle = '';
+const BASE_TITLE = document.title;
+const focusBanner = document.getElementById('focusBanner');
+const focusInfo = document.getElementById('focusInfo');
+
+function renderFocused(){
+  const p = PRODUCTS.find(x=>x.handle===focusedHandle);
+  if(!p){ focusedHandle=''; return render(); }
+  grid.innerHTML = card(p);
+  count.textContent = 'Produto selecionado a partir da busca';
+  empty.style.display = 'none';
+  const el = grid.querySelector('.card');
+  if(el){
+    el.classList.add('focused');
+    el.querySelectorAll('details').forEach(d=>{ d.open = true; });
+  }
+  focusInfo.innerHTML = (p.image?`<img src="${esc(p.image)}" alt="">`:'')
+    + `<p><small>Resultado da busca</small>${esc(p.title)}</p>`;
+  focusBanner.classList.add('on');
+  document.title = p.title + ' | Chumbada Oficial';
+}
+
+function clearFocus(){
+  if(!focusedHandle) return;
+  focusedHandle = '';
+  focusBanner.classList.remove('on');
+  document.title = BASE_TITLE;
+  // replaceState evita disparar hashchange e entrar em laço com o roteador
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+function routeFromHash(){
+  const m = (location.hash||'').match(/^#\/produto\/(.+)$/);
+  const handle = m ? decodeURIComponent(m[1]) : '';
+  focusedHandle = PRODUCTS.some(p=>p.handle===handle) ? handle : '';
+  if(focusedHandle){
+    q.value = '';
+    render();
+    document.getElementById('catalogo').scrollIntoView({behavior:'smooth',block:'start'});
+  } else {
+    focusBanner.classList.remove('on');
+    document.title = BASE_TITLE;
+    render();
+  }
+}
+
+document.getElementById('focusClear').addEventListener('click', ()=>{ clearFocus(); render(); });
+window.addEventListener('hashchange', routeFromHash);
+q.addEventListener('input', ()=>{ clearFocus(); render(); });
+routeFromHash();
 </script>
 </body>
 </html>
