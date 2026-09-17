@@ -71,7 +71,23 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 .var-sku{font-size:11px;color:var(--muted);font-family:monospace}
 .var-price{font-size:14px;font-weight:800;color:var(--orange)}
 .var-badge{font-size:11px;font-weight:800;padding:4px 8px;border-radius:6px}
-.btn-add-selecao{margin-top:4px;padding:5px 10px;font-size:11px;font-weight:700;color:#fff;background:var(--orange);border:0;border-radius:6px;cursor:pointer}
+button.var-row,button.group-pill{font-family:inherit;text-align:left;cursor:pointer;width:100%}
+.selecao-hint{font-size:12px;color:var(--muted);margin:-4px 0 8px}
+.selecao-option{transition:border-color .15s ease,background .15s ease}
+.selecao-option:hover{border-color:var(--orange)}
+.selecao-option.active{border-color:var(--orange);background:var(--soft)}
+button.group-pill.selecao-option{width:auto;text-align:center}
+.selecao-picker{margin-top:14px;padding:12px;background:var(--soft);border:1px solid var(--orange2);border-radius:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.selecao-picker-label{font-size:13px;font-weight:700;color:var(--ink)}
+.selecao-picker-controls{display:flex;align-items:center;gap:10px}
+.selecao-qty-stepper{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;
+  padding:5px 8px;background:#fff}
+.selecao-qty-stepper button{width:24px;height:24px;border:1px solid var(--line);background:#fafafa;border-radius:6px;
+  cursor:pointer;font-size:14px;line-height:1;padding:0}
+.selecao-qty-stepper span{min-width:18px;text-align:center;font-size:13px;font-weight:600}
+#selecaoPickerAdd{padding:8px 14px;font-size:13px;font-weight:700;color:#fff;background:var(--orange);
+  border:0;border-radius:8px;cursor:pointer}
 .var-badge.option{background:#eef2f5;color:#1d2730}
 .var-badge.weight{background:#111;color:#fff}
 .groups-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
@@ -243,36 +259,6 @@ function parsePriceNumber(val) {
   return isNaN(num) ? 0 : num;
 }
 
-// Lista plana com uma linha por SKU exato, usada só pra "Adicionar à Minha
-// Seleção" — mantém variationList() intocado (ele agrupa pesos/cores em
-// "pills" que às vezes representam mais de um SKU, o que não dá pra usar
-// como alvo de um botão de adicionar sem ambiguidade).
-function addableRows(p) {
-  const rows = (p.variants || []).map(v => {
-    const opts = (v.opts || []).filter(o => !(normalizeText(o.name) === 'title' && normalizeText(o.value) === 'default title'));
-    const variantLabel = opts.map(o => `${o.name}: ${o.value}`).join(', ');
-    const optionBadges = opts.map(o => `<span class="var-badge option">${esc(o.value)}</span>`).join('');
-    const priceNum = parsePriceNumber(v.price);
-    if (!priceNum) return '';
-    return `
-      <div class="var-row">
-        <div class="var-details">${optionBadges}</div>
-        <div class="var-meta">
-          <span class="var-sku">SKU: ${esc(v.sku || '-')}</span>
-          <span class="var-price">${esc(formatPrice(v.price))}</span>
-          <button type="button" class="btn-add-selecao"
-            data-product-id="${esc(p.handle)}"
-            data-name="${esc(p.title)}"
-            data-sku="${esc(v.sku || '')}"
-            data-variant="${esc(variantLabel)}"
-            data-price="${priceNum}">Adicionar</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-  return rows ? `<div class="vars-list">${rows}</div>` : '';
-}
-
 function getColorHex(name) {
   const map = {
     'Natural': '#708090',
@@ -313,14 +299,16 @@ function variationList(p) {
     
     const varRows = rows.map(v => {
       const optionBadges = v.opts.map(o => `<span class="var-badge option">${esc(o.value)}</span>`).join('');
+      const label = v.opts.map(o => o.value).join(', ') || 'Padrão';
+      const priceNum = parsePriceNumber(v.price);
       return `
-        <div class="var-row">
+        <button type="button" class="var-row selecao-option" data-sku="${esc(v.sku || '')}" data-price="${priceNum}" data-label="${esc(label)}">
           <div class="var-details">${optionBadges}</div>
           <div class="var-meta">
             <span class="var-sku">SKU: ${esc(v.sku || '-')}</span>
             <span class="var-price">${esc(formatPrice(v.price))}</span>
           </div>
-        </div>
+        </button>
       `;
     }).join('');
     
@@ -384,8 +372,11 @@ function variationList(p) {
       
       const skus = matchVars.map(v => v.sku).filter(Boolean).join(', ');
       const titleAttr = skus ? ` title="SKU: ${skus}"` : '';
-      
-      return `<span class="group-pill"${titleAttr}>${esc(w)}: <b>${esc(priceStr)}</b></span>`;
+      const representative = matchVars[0] || {};
+      const priceNum = parsePriceNumber(representative.price);
+      const label = `${groupName} — ${w}`;
+
+      return `<button type="button" class="group-pill selecao-option"${titleAttr} data-sku="${esc(representative.sku || '')}" data-price="${priceNum}" data-label="${esc(label)}">${esc(w)}: <b>${esc(priceStr)}</b></button>`;
     }).join('');
     
     return `
@@ -455,9 +446,19 @@ function productPageHTML(p){
         ${priceBlock(p)}
         ${availabilityBlock(p)}
         <h2 class="variationsTitle">Todas as variações</h2>
+        <p class="selecao-hint">Clique numa variação para adicionar à Minha Seleção.</p>
         ${variationList(p)}
-        <h2 class="variationsTitle">Adicionar à Minha Seleção</h2>
-        ${addableRows(p)}
+        <div id="selecaoPicker" class="selecao-picker" style="display:none">
+          <div class="selecao-picker-label"></div>
+          <div class="selecao-picker-controls">
+            <div class="selecao-qty-stepper">
+              <button type="button" data-qty-action="dec" aria-label="Diminuir quantidade">−</button>
+              <span class="selecao-qty-value">1</span>
+              <button type="button" data-qty-action="inc" aria-label="Aumentar quantidade">+</button>
+            </div>
+            <button type="button" id="selecaoPickerAdd">Adicionar à Minha Seleção</button>
+          </div>
+        </div>
       </div>
     </div>
     <a class="btn backBtn" href="#">← Voltar ao catálogo</a>
@@ -494,23 +495,60 @@ function showCatalog(){
   render();
 }
 
+let currentProduct = null;
+let selecaoQty = 1;
+
+function updateSelecaoQtyDisplay() {
+  const el = productPageEl.querySelector('.selecao-qty-value');
+  if (el) el.textContent = selecaoQty;
+}
+
 productPageEl.addEventListener('click', function (e) {
-  const btn = e.target.closest('.btn-add-selecao');
-  if (!btn || !window.MinhaSelecao) return;
-  window.MinhaSelecao.addItem({
-    catalog: 'chumbadas',
-    productId: btn.dataset.productId,
-    name: btn.dataset.name,
-    sku: btn.dataset.sku || null,
-    variant: btn.dataset.variant || '',
-    qty: 1,
-    unitPrice: Number(btn.dataset.price) || 0,
-  });
+  const optionBtn = e.target.closest('.selecao-option');
+  if (optionBtn) {
+    productPageEl.querySelectorAll('.selecao-option.active').forEach(el => el.classList.remove('active'));
+    optionBtn.classList.add('active');
+    const picker = productPageEl.querySelector('#selecaoPicker');
+    if (picker) {
+      picker.dataset.sku = optionBtn.dataset.sku || '';
+      picker.dataset.price = optionBtn.dataset.price || '0';
+      picker.dataset.label = optionBtn.dataset.label || '';
+      picker.querySelector('.selecao-picker-label').textContent = optionBtn.dataset.label || '';
+      picker.style.display = 'flex';
+      selecaoQty = 1;
+      updateSelecaoQtyDisplay();
+    }
+    return;
+  }
+
+  const qtyBtn = e.target.closest('[data-qty-action]');
+  if (qtyBtn) {
+    selecaoQty = qtyBtn.dataset.qtyAction === 'inc' ? selecaoQty + 1 : Math.max(1, selecaoQty - 1);
+    updateSelecaoQtyDisplay();
+    return;
+  }
+
+  const addBtn = e.target.closest('#selecaoPickerAdd');
+  if (addBtn && window.MinhaSelecao && currentProduct) {
+    const picker = productPageEl.querySelector('#selecaoPicker');
+    const priceNum = Number(picker.dataset.price) || 0;
+    if (!priceNum) return;
+    window.MinhaSelecao.addItem({
+      catalog: 'chumbadas',
+      productId: currentProduct.handle,
+      name: currentProduct.title,
+      sku: picker.dataset.sku || null,
+      variant: picker.dataset.label || '',
+      qty: selecaoQty,
+      unitPrice: priceNum,
+    });
+  }
 });
 
 function showProduct(handle){
   const p = PRODUCTS.find(x=>x.handle===handle);
   if(!p){ location.hash=''; return; }
+  currentProduct = p;
   heroEl.style.display = 'none';
   toolbarEl.style.display = 'none';
   catalogoEl.style.display = 'none';
