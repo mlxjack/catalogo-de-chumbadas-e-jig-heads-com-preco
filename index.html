@@ -52,6 +52,11 @@ h3{font-size:20px;line-height:1.1;margin:0;letter-spacing:-.03em}
 .optionPills span{background:#eef2f5;color:#1d2730;border-radius:999px;padding:4px 8px;font-weight:900}
 .desc{margin:0;color:#53606a;line-height:1.45;font-size:14px}.descPreview{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.descDetails{margin:0;border-top:0;padding-top:0}.descDetails summary{display:block;cursor:pointer;font-weight:400;color:inherit;list-style:none}.descDetails summary::-webkit-details-marker{display:none}.descDetails summary:after{content:"Ver tudo";display:inline-flex;width:auto;height:auto;background:transparent;color:var(--orange);border-radius:0;margin-top:6px;font-size:13px;font-weight:1000}.descDetails[open] summary:after{content:"Recolher"}.descDetails[open] .descPreview{display:none}.descFull{margin:0;color:#53606a;line-height:1.45;font-size:14px}
 .weightLine{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto}.pill{font-size:12px;padding:7px 9px;border-radius:999px;background:#eef2f5;color:#1d2730;font-weight:900}.pill.more{background:#111;color:#fff}
+.thumb{text-decoration:none}
+h3 a{color:inherit;text-decoration:none}
+h3 a:hover{color:var(--orange)}
+.detailLink{color:var(--orange);font-weight:900;font-size:13px;text-decoration:none}
+.detailLink:hover{text-decoration:underline}
 details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;font-weight:1000;color:#111;list-style:none;display:flex;justify-content:space-between;align-items:center}summary::-webkit-details-marker{display:none}summary:after{content:"+";background:#111;color:#fff;border-radius:999px;width:24px;height:24px;display:grid;place-items:center}details[open] summary:after{content:"−"}
 .tableWrap{margin-top:12px;max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:16px}table{border-collapse:collapse;width:100%;font-size:13px;background:#fff}th,td{padding:10px;border-bottom:1px solid #edf1f3;text-align:left;vertical-align:top}th{position:sticky;top:0;background:#f8fafb;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#62707c}td{color:#27323b}.empty{display:none;text-align:center;padding:50px;background:#fff;border:1px dashed var(--line);border-radius:28px;color:#65727d}
 .footer{background:#101418;color:#d7e0e7;padding:34px 22px;text-align:center}.footer b{color:#fff}
@@ -75,19 +80,27 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
 .group-pills{display:flex;flex-wrap:wrap;gap:6px}
 .group-pill{font-size:12px;background:#fff;border:1px solid var(--line);color:#26313a;padding:5px 8px;border-radius:8px;font-weight:500;cursor:help}
 .group-pill b{color:var(--orange);font-weight:800;margin-left:4px}
-.focusBanner{display:none;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,var(--soft),#fff);border:1px solid #ffd9bb;border-radius:20px;padding:14px 18px;margin-bottom:20px}
-.focusBanner.on{display:flex}
-.focusBanner .focusInfo{display:flex;align-items:center;gap:12px;min-width:0}
-.focusBanner .focusInfo img{width:46px;height:46px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px;flex:none}
-.focusBanner p{margin:0;font-weight:800;color:#8a3a00;font-size:14px}
-.focusBanner p small{display:block;font-weight:800;color:#b0784f;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
-.focusBanner button{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:#111;font-family:inherit;font-size:13px;font-weight:900;border:0;border-radius:999px;padding:11px 17px;cursor:pointer;flex:none}
-.focusBanner button:hover{background:var(--orange2)}
-.card.focused{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,106,0,.22),0 18px 45px rgba(20,32,44,.12)}
+.productPage{max-width:1180px;margin:0 auto;padding:30px 22px 70px}
+.breadcrumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:800;margin-bottom:24px}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb a:hover{color:var(--orange)}
+.breadcrumb .current{color:var(--ink)}
+.productGrid{display:grid;grid-template-columns:1fr 1.15fr;gap:34px;align-items:start}
+.productImage{background:linear-gradient(135deg,#f8fafb,#e8eef2);border:1px solid var(--line);border-radius:28px;min-height:360px;display:flex;align-items:center;justify-content:center;padding:34px;position:sticky;top:90px}
+.productImage img{max-width:100%;max-height:420px;object-fit:contain;filter:drop-shadow(0 24px 30px rgba(0,0,0,.18))}
+.productImage .noimg{font-weight:1000;color:#a4adb5;text-transform:uppercase;letter-spacing:.08em}
+.productInfo h1{font-size:clamp(26px,4vw,38px);letter-spacing:-.03em;margin:14px 0 6px;line-height:1.05}
+.productInfo .varcount{color:var(--muted);font-weight:800;margin-bottom:18px}
+.productInfo .price-row{font-size:22px;margin:4px 0 18px}
+.productInfo .price-tag{font-size:18px;padding:8px 14px;border-radius:12px}
+.variationsTitle{font-size:18px;margin:26px 0 12px;letter-spacing:-.02em}
+.productPage .tableWrap{max-height:none}
+.backBtn{margin-top:34px}
+@media(max-width:860px){.productGrid{grid-template-columns:1fr}.productImage{position:static;min-height:280px}}
 </style>
 </head>
 <body>
-<header class="hero">
+<header class="hero" id="hero">
   <div class="wrap">
     <div class="brand"><div class="logoMark">CO</div><span>Chumbada Oficial</span></div>
     <h1>Catálogo de Chumbadas e Jig Heads com Preços</h1>
@@ -101,7 +114,7 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
     </div>
   </div>
 </header>
-<nav class="toolbar">
+<nav class="toolbar" id="toolbar">
   <div class="tools">
     <div class="search"><input id="q" type="search" placeholder="Buscar por modelo, peso, anzol ou variação..." autocomplete="off"></div>
     <div class="filters">
@@ -112,9 +125,9 @@ details{margin-top:4px;border-top:1px solid var(--line);padding-top:12px}summary
     </div>
   </div>
 </nav>
+<section class="productPage" id="productPage" style="display:none"></section>
 <main id="catalogo">
   <div class="sectionHead"><div><h2>Catálogo completo</h2><div class="count" id="count"></div></div></div>
-  <div class="focusBanner" id="focusBanner"><div class="focusInfo" id="focusInfo"></div><button type="button" id="focusClear">Ver catálogo completo</button></div>
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty">Nenhum modelo encontrado com esse filtro.</div>
 </main>
@@ -348,17 +361,16 @@ function variationList(p) {
   return `<div class="groups-list">${html}</div>`;
 }
 
-function card(p){
-  const id = p.category==='Jig Heads'?' id="jigheads"':'';
-  const weights = p.weights && p.weights.length ? p.weights : (p.hooks || []);
+function availabilityBlock(p){
   const mountOptions = getMountOptions(p);
   const optionRow = mountOptions.length ? `<div class="availabilityRow"><b>Opções</b><div class="optionPills">${mountOptions.map(o=>`<span>${esc(o)}</span>`).join('')}</div></div>` : '';
   const hasColors = p.category === 'Chumbadas' || (p.category === 'Jig Heads' && p.variants.some(v => v.opts.some(o => o.name === 'Cor' && o.value !== 'Natural')));
-  const availability = hasColors ? `<div class="availability">
+  return hasColors ? `<div class="availability">
     <div class="availabilityRow"><b>Cores</b><div class="swatches">${getLeadColors(p).map(c=>`<span class="swatch" style="--swatch:${c.color}">${esc(c.name)}</span>`).join('')}</div></div>
     ${p.category === 'Chumbadas' ? optionRow : ''}
   </div>` : '';
-  
+}
+function priceBlock(p){
   const prices = p.variants.map(v => {
     if (!v.price) return null;
     let s = String(v.price).replace('R$', '').replace(/\s+/g, '');
@@ -366,33 +378,50 @@ function card(p){
     let num = parseFloat(s);
     return isNaN(num) ? null : num;
   }).filter(v => v !== null);
-  
-  let priceStr = '';
-  if (prices.length > 0) {
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    if (minPrice === maxPrice) {
-      priceStr = `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')}</span></div>`;
-    } else {
-      priceStr = `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')} - R$ ${maxPrice.toFixed(2).replace('.', ',')}</span></div>`;
-    }
+  if (!prices.length) return '';
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  if (minPrice === maxPrice) {
+    return `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')}</span></div>`;
   }
-
+  return `<div class="price-row"><span class="price-tag">R$ ${minPrice.toFixed(2).replace('.', ',')} - R$ ${maxPrice.toFixed(2).replace('.', ',')}</span></div>`;
+}
+function card(p){
+  const id = p.category==='Jig Heads'?' id="jigheads"':'';
+  const weights = p.weights && p.weights.length ? p.weights : (p.hooks || []);
+  const href = `#/produto/${encodeURIComponent(p.handle)}`;
   return `<article class="card"${id}>
-    <div class="thumb">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`:`<div class="noimg">Sem imagem</div>`}</div>
+    <a class="thumb" href="${href}">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`:`<div class="noimg">Sem imagem</div>`}</a>
     <div class="body">
       <div class="kicker"><span class="badge">${esc(p.category)}</span><span class="varcount">${p.variantCount} variações</span></div>
-      <h3>${esc(p.title)}</h3>
-      ${priceStr}
+      <h3><a href="${href}">${esc(p.title)}</a></h3>
+      ${priceBlock(p)}
       ${descriptionBlock(p.description)}
-      ${availability}
+      ${availabilityBlock(p)}
       <div class="weightLine">${chips(weights)}</div>
-      <details><summary>Ver pesos e variações</summary>${variationList(p)}</details>
+      <a class="detailLink" href="${href}">Ver página do produto →</a>
     </div>
   </article>`;
 }
+function productPageHTML(p){
+  return `<div class="wrap">
+    <nav class="breadcrumb"><a href="#">Início</a><span>/</span><span>${esc(p.category)}</span><span>/</span><span class="current">${esc(p.title)}</span></nav>
+    <div class="productGrid">
+      <div class="productImage">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}">`:`<div class="noimg">Sem imagem</div>`}</div>
+      <div class="productInfo">
+        <span class="badge">${esc(p.category)}</span>
+        <h1>${esc(p.title)}</h1>
+        <div class="varcount">${p.variantCount} variaç${p.variantCount===1?'ão':'ões'} disponíve${p.variantCount===1?'l':'is'}</div>
+        ${priceBlock(p)}
+        ${availabilityBlock(p)}
+        <h2 class="variationsTitle">Todas as variações</h2>
+        ${variationList(p)}
+      </div>
+    </div>
+    <a class="btn backBtn" href="#">← Voltar ao catálogo</a>
+  </div>`;
+}
 function render(){
-  if(focusedHandle) return renderFocused();
   const term = normalizeText(q.value.trim());
   const filtered = PRODUCTS.filter(p=>{
     const byCat = activeFilter==='Todos' || p.category===activeFilter;
@@ -406,57 +435,47 @@ function render(){
 }
 document.querySelectorAll('.chip').forEach(btn=>btn.addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); activeFilter=btn.dataset.filter; clearFocus(); render();
+  btn.classList.add('active'); activeFilter=btn.dataset.filter; render();
 }));
-let focusedHandle = '';
 const BASE_TITLE = document.title;
-const focusBanner = document.getElementById('focusBanner');
-const focusInfo = document.getElementById('focusInfo');
+const heroEl = document.getElementById('hero');
+const toolbarEl = document.getElementById('toolbar');
+const catalogoEl = document.getElementById('catalogo');
+const productPageEl = document.getElementById('productPage');
 
-function renderFocused(){
-  const p = PRODUCTS.find(x=>x.handle===focusedHandle);
-  if(!p){ focusedHandle=''; return render(); }
-  grid.innerHTML = card(p);
-  count.textContent = 'Produto selecionado a partir da busca';
-  empty.style.display = 'none';
-  const el = grid.querySelector('.card');
-  if(el){
-    el.classList.add('focused');
-    el.querySelectorAll('details').forEach(d=>{ d.open = true; });
-  }
-  focusInfo.innerHTML = (p.image?`<img src="${esc(p.image)}" alt="">`:'')
-    + `<p><small>Resultado da busca</small>${esc(p.title)}</p>`;
-  focusBanner.classList.add('on');
-  document.title = p.title + ' | Chumbada Oficial';
+function showCatalog(){
+  heroEl.style.display = '';
+  toolbarEl.style.display = '';
+  catalogoEl.style.display = '';
+  productPageEl.style.display = 'none';
+  document.title = BASE_TITLE;
+  render();
 }
 
-function clearFocus(){
-  if(!focusedHandle) return;
-  focusedHandle = '';
-  focusBanner.classList.remove('on');
-  document.title = BASE_TITLE;
-  // replaceState evita disparar hashchange e entrar em laço com o roteador
-  history.replaceState(null, '', location.pathname + location.search);
+function showProduct(handle){
+  const p = PRODUCTS.find(x=>x.handle===handle);
+  if(!p){ location.hash=''; return; }
+  heroEl.style.display = 'none';
+  toolbarEl.style.display = 'none';
+  catalogoEl.style.display = 'none';
+  productPageEl.innerHTML = productPageHTML(p);
+  productPageEl.style.display = '';
+  document.title = p.title + ' | Chumbada Oficial';
+  window.scrollTo(0, 0);
 }
 
 function routeFromHash(){
   const m = (location.hash||'').match(/^#\/produto\/(.+)$/);
   const handle = m ? decodeURIComponent(m[1]) : '';
-  focusedHandle = PRODUCTS.some(p=>p.handle===handle) ? handle : '';
-  if(focusedHandle){
-    q.value = '';
-    render();
-    document.getElementById('catalogo').scrollIntoView({behavior:'smooth',block:'start'});
+  if(handle && PRODUCTS.some(p=>p.handle===handle)){
+    showProduct(handle);
   } else {
-    focusBanner.classList.remove('on');
-    document.title = BASE_TITLE;
-    render();
+    showCatalog();
   }
 }
 
-document.getElementById('focusClear').addEventListener('click', ()=>{ clearFocus(); render(); });
 window.addEventListener('hashchange', routeFromHash);
-q.addEventListener('input', ()=>{ clearFocus(); render(); });
+q.addEventListener('input', render);
 routeFromHash();
 </script>
 </body>
