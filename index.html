@@ -207,6 +207,44 @@ td{color:var(--ink2)}
 }
 @media(max-width:340px){.grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- Seletor de variações ---------- */
+.cfg{display:flex;flex-direction:column;gap:18px;margin:0 0 26px}
+.cfgLabel{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;display:flex;align-items:baseline;gap:10px}
+.cfgLabel b{color:var(--ink);font-size:13.5px;letter-spacing:0;text-transform:none;font-weight:700}
+.cfgOpts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:9px 14px;background:#fff;border:1.5px solid var(--line);border-radius:11px;font:600 14px var(--font);color:var(--ink2);cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s}
+.opt:hover{border-color:#c7ccd2}
+.opt i{width:18px;height:18px;border-radius:50%;background:var(--swatch);border:1px solid rgba(0,0,0,.25);box-shadow:inset 0 -2px 3px rgba(0,0,0,.12);flex:none}
+.opt.active{border-color:var(--orange);background:var(--soft);color:var(--ink);box-shadow:0 0 0 3px rgba(255,106,0,.14)}
+.cfgOpts.weights{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}
+.wopt{flex-direction:column;justify-content:center;align-items:center;gap:1px;padding:8px 6px}
+.wopt span{font-weight:700;font-size:14.5px}
+.wopt small{font-size:12px;color:var(--muted);font-weight:700}
+.wopt.active small{color:var(--orangeD)}
+.buyBar{display:flex;flex-direction:column;gap:12px;background:var(--dark);color:#fff;border-radius:16px;padding:16px 18px;margin-top:2px}
+.buyInfo{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 14px}
+.buyLabel{flex:1 1 100%;font-weight:600;font-size:13.5px;color:#cdd6de}
+.buyPrice{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.buySku{font-size:11px;color:#8d9aa7;font-family:ui-monospace,Consolas,monospace}
+.buyAct{display:flex;gap:10px}
+.buyAct #selecaoPickerAdd{flex:1;padding:13px 16px;font-size:14px}
+#selecaoPickerAdd.done{background:#22a35a;color:#fff}
+.aboutBox{margin:0 0 22px}
+.aboutBox .variationsTitle{margin-top:6px}
+.aboutBox .desc{margin:0}
+.kitList{margin:8px 0 0;padding-left:20px;color:#48525c;font-size:14.5px;line-height:1.7}
+@media(max-width:860px){
+  .productPage{padding-bottom:190px}
+  .productImage{min-height:0;padding:50px 12px 8px}
+  .productImage img{max-height:170px}
+  .productImage3d{min-height:0;height:300px}
+  .productInfo h1{font-size:34px}
+  .buyBar{position:fixed;left:0;right:0;bottom:0;z-index:20;border-radius:18px 18px 0 0;padding:12px 90px calc(12px + env(safe-area-inset-bottom)) 16px;gap:8px;box-shadow:0 -10px 30px rgba(15,20,25,.25)}
+  .buyLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .buyPrice{font-size:22px}
+  .buySku{margin-left:auto}
+}
 </style>
 <script src="https://selecao.chumbada.com.br/client.js" defer></script>
 </head>
@@ -368,170 +406,110 @@ function kitContentItems(p){
   if(downShot) return [`Chumbadas de ${downShot[1].trim()} gramas, ${downShot[2].trim()}.`];
   return [];
 }
-function formatPrice(val) {
-  if (!val) return '-';
-  if (typeof val === 'number') {
-    return 'R$ ' + val.toFixed(2).replace('.', ',');
-  }
-  let s = String(val).trim();
-  if (s.startsWith('R$')) return s;
-  let num = parseFloat(s.replace(',', '.'));
-  if (!isNaN(num)) {
-    return 'R$ ' + num.toFixed(2).replace('.', ',');
-  }
-  return s;
+const SHOW_PRICE = true;
+const COLOR_HEX = {'Natural':'#b8b0a6','Amarelo':'#ffd429','Preto':'#111111','Vermelho':'#d71920','Laranja':'#ff7a00','Branca':'#ffffff','Branco':'#ffffff','Azul':'#1f6fe5','Verde':'#1f9d55','Rosa':'#f48fb1','Luminoso':'#adff2f'};
+let cfg = null;
+function cfgIsWeight(n){ return /^peso/.test(normalizeText(n)); }
+function cfgDimLabel(n){
+  const k = normalizeText(n);
+  if(k==='cor') return 'Cor';
+  if(/^varia/.test(k)) return 'Opção';
+  return n;
 }
-
-function parsePriceNumber(val) {
-  if (typeof val === 'number') return val;
-  let s = String(val || '').replace('R$', '').replace(/\s+/g, '');
-  s = s.replace(/\./g, '').replace(',', '.');
-  const num = parseFloat(s);
-  return isNaN(num) ? 0 : num;
+function cfgNum(val){
+  if(typeof val==='number') return val;
+  const n = parseFloat(String(val||'').replace('R$','').replace(/\s+/g,'').replace(/\./g,'').replace(',','.'));
+  return isNaN(n) ? 0 : n;
 }
-
-function getColorHex(name) {
-  const map = {
-    'Natural': '#708090',
-    'Amarelo': '#FFD700',
-    'Laranja': '#FF8C00',
-    'Preto': '#2a2a2a',
-    'Vermelho': '#FF0000',
-    'Azul': '#0000FF',
-    'Verde': '#008000',
-    'Rosa': '#FFC0CB',
-    'Branco': '#FFFFFF',
-    'Luminoso': '#ADFF2F'
-  };
-  return map[name] || '#708090';
-}
-
-function sortWeightsList(arr) {
-  return arr.sort((a, b) => {
-    const na = parseFloat(a.replace(/[^\d\.]/g, '')) || 0;
-    const nb = parseFloat(b.replace(/[^\d\.]/g, '')) || 0;
-    return na - nb;
-  });
-}
-
-function variationList(p) {
-  const rows = p.variants.map(v => ({
-    ...v,
-    opts: (v.opts || []).filter(o => !(normalizeText(o.name) === 'title' && normalizeText(o.value) === 'default title'))
-  }));
-  
-  if (p.category === 'Kits') {
-    const items = kitContentItems(p);
-    let contentTable = '';
-    if (items.length) {
-      const body = items.map(item => `<tr><td>${esc(item)}</td></tr>`).join('');
-      contentTable = `<div class="tableWrap" style="margin-bottom: 12px;"><table><thead><tr><th>Conteúdo do kit</th></tr></thead><tbody>${body}</tbody></table></div>`;
-    }
-    
-    const varRows = rows.map(v => {
-      const optionBadges = v.opts.map(o => `<span class="var-badge option">${esc(o.value)}</span>`).join('');
-      const label = v.opts.map(o => o.value).join(', ') || 'Padrão';
-      const priceNum = parsePriceNumber(v.price);
-      return `
-        <button type="button" class="var-row selecao-option" data-sku="${esc(v.sku || '')}" data-price="${priceNum}" data-label="${esc(label)}">
-          <div class="var-details">${v.image ? `<img src="${esc(v.image)}" alt="${esc(p.title + ' — ' + label)}" width="72" height="72" style="object-fit:contain" loading="lazy">` : ''}${optionBadges}</div>
-          <div class="var-meta">
-            <span class="var-sku">SKU: ${esc(v.sku || '-')}</span>
-            <span class="var-price">${esc(formatPrice(v.price))}</span>
-          </div>
-        </button>
-      `;
-    }).join('');
-    
-    return contentTable + `<div class="vars-list">${varRows}</div>`;
-  }
-  
-  const groups = {};
-  
-  rows.forEach(v => {
-    const colorOpt = v.opts.find(o => o.name === 'Cor');
-    const colorType = colorOpt ? (colorOpt.value === 'Natural' ? 'Natural' : 'Colorida') : '';
-    
-    const weightOpt = v.opts.find(o => normalizeText(o.name).includes('peso'));
-    const weight = weightOpt ? weightOpt.value : '';
-    
-    const attachmentOpt = v.opts.find(o => o !== colorOpt && o !== weightOpt);
-    const attachment = attachmentOpt ? attachmentOpt.value : '';
-    
-    let groupName = '';
-    if (colorType && attachment) {
-      groupName = `${colorType} com ${attachment}`;
-    } else if (colorType) {
-      groupName = colorType;
-    } else if (attachment) {
-      groupName = attachment;
-    } else {
-      groupName = 'Variações';
-    }
-    
-    if (!groups[groupName]) {
-      groups[groupName] = [];
-    }
-    groups[groupName].push({
-      weight,
-      price: v.price,
-      sku: v.sku
+function fmtBRL(n){ return 'R$ ' + n.toFixed(2).replace('.',','); }
+function weightNum(w){ return parseFloat(String(w).replace(',','.').replace(/[^\d.]/g,'')) || 0; }
+function buildConfig(p){
+  const rows = p.variants.map(v=>{
+    const dims = {}; let w = '';
+    (v.opts||[]).forEach(o=>{
+      if(normalizeText(o.name)==='title' && normalizeText(o.value)==='default title') return;
+      if(cfgIsWeight(o.name)) w = o.value; else dims[o.name] = o.value;
     });
+    return {v, dims, w, price: cfgNum(v.price)};
   });
-  
-  const html = Object.entries(groups).map(([groupName, groupVariants]) => {
-    const uniqueWeights = Array.from(new Set(groupVariants.map(v => v.weight).filter(Boolean)));
-    const sortedWeights = sortWeightsList(uniqueWeights);
-    
-    const pills = sortedWeights.map(w => {
-      const matchVars = groupVariants.filter(v => v.weight === w);
-      const prices = Array.from(new Set(matchVars.map(v => v.price)));
-      
-      let priceStr = '';
-      if (prices.length === 1) {
-        priceStr = formatPrice(prices[0]);
-      } else {
-        const priceNums = prices.map(p => parseFloat(String(p).replace('R$', '').replace(/\s+/g, '').replace(/\./g, '').replace(',', '.'))).filter(n => !isNaN(n));
-        if (priceNums.length > 0) {
-          const minP = Math.min(...priceNums);
-          const maxP = Math.max(...priceNums);
-          priceStr = minP === maxP ? `R$ ${minP.toFixed(2).replace('.', ',')}` : `R$ ${minP.toFixed(2).replace('.', ',')} - R$ ${maxP.toFixed(2).replace('.', ',')}`;
-        } else {
-          priceStr = formatPrice(prices[0]);
-        }
-      }
-      
-      const skus = matchVars.map(v => v.sku).filter(Boolean).join(', ');
-      const titleAttr = skus ? ` title="SKU: ${skus}"` : '';
-      const representative = matchVars[0] || {};
-      const priceNum = parsePriceNumber(representative.price);
-      const label = `${groupName} — ${w}`;
-
-      return `<button type="button" class="group-pill selecao-option"${titleAttr} data-sku="${esc(representative.sku || '')}" data-price="${priceNum}" data-label="${esc(label)}">${esc(w)}: <b>${esc(priceStr)}</b></button>`;
-    }).join('');
-    
-    return `
-      <div class="group-container">
-        <div class="group-title">${esc(groupName)}</div>
-        <div class="group-pills">
-          ${pills}
-        </div>
+  const names = [];
+  rows.forEach(r=>Object.keys(r.dims).forEach(n=>{ if(!names.includes(n)) names.push(n); }));
+  names.sort((a,b)=>(normalizeText(a)==='cor'?0:1)-(normalizeText(b)==='cor'?0:1));
+  const dimList = names.concat(rows.some(r=>r.w) ? ['__w'] : []);
+  const get = (r,d)=> d==='__w' ? r.w : (r.dims[d]||'');
+  const values = {};
+  dimList.forEach(d=>{
+    const u = [];
+    rows.forEach(r=>{ const x = get(r,d); if(x && !u.includes(x)) u.push(x); });
+    if(d==='__w') u.sort((a,b)=>weightNum(a)-weightNum(b));
+    values[d] = u;
+  });
+  const c = {p, rows, dimList, values, get, chosen:{}, variant:null, qty:1};
+  pick(c, null, null);
+  return c;
+}
+function pick(c, dim, val){
+  let cand = c.rows;
+  const chosen = {};
+  const order = dim ? [dim, ...c.dimList.filter(d=>d!==dim)] : c.dimList;
+  order.forEach(d=>{
+    const want = d===dim ? val : c.chosen[d];
+    let f = want ? cand.filter(r=>c.get(r,d)===want) : [];
+    if(!f.length) f = cand;
+    chosen[d] = c.get(f[0], d);
+    cand = f.filter(r=>c.get(r,d)===chosen[d]);
+  });
+  c.chosen = chosen;
+  c.variant = cand[0];
+}
+function cfgLabel(c){ return c.dimList.map(d=>c.chosen[d]).filter(Boolean).join(' · '); }
+function renderCfg(){
+  const c = cfg, host = document.getElementById('cfg');
+  if(!c || !host) return;
+  let html = '';
+  c.dimList.filter(d=>d!=='__w' && c.values[d].length>1).forEach(d=>{
+    const isColor = normalizeText(d)==='cor';
+    html += `<div class="cfgRow"><div class="cfgLabel">${esc(cfgDimLabel(d))}<b>${esc(c.chosen[d])}</b></div><div class="cfgOpts">`
+      + c.values[d].map(v=>`<button type="button" class="opt${v===c.chosen[d]?' active':''}" data-dim="${esc(d)}" data-val="${esc(v)}">${isColor?`<i style="--swatch:${COLOR_HEX[v]||'#b8b0a6'}"></i>`:''}${esc(v)}</button>`).join('')
+      + `</div></div>`;
+  });
+  if(c.dimList.includes('__w') && c.values.__w.length>1){
+    const seen = new Set();
+    const avail = c.rows
+      .filter(r=>c.dimList.every(d=>d==='__w' || c.get(r,d)===c.chosen[d]))
+      .filter(r=>!seen.has(r.w) && seen.add(r.w))
+      .sort((a,b)=>weightNum(a.w)-weightNum(b.w));
+    html += `<div class="cfgRow"><div class="cfgLabel">Peso<b>${esc(c.chosen.__w)}</b></div><div class="cfgOpts weights">`
+      + avail.map(r=>`<button type="button" class="opt wopt${r.w===c.chosen.__w?' active':''}" data-dim="__w" data-val="${esc(r.w)}"><span>${esc(r.w)}</span>${SHOW_PRICE&&r.price?`<small>${fmtBRL(r.price)}</small>`:''}</button>`).join('')
+      + `</div></div>`;
+  }
+  const r = c.variant;
+  const label = cfgLabel(c) || c.p.title;
+  html += `<div class="buyBar">
+    <div class="buyInfo"><span class="buyLabel">${esc(label)}</span>${SHOW_PRICE?`<b class="buyPrice">${r.price?fmtBRL(r.price):'Consulte'}</b>`:''}<span class="buySku">SKU ${esc(r.v.sku||'-')}</span></div>
+    <div class="buyAct">
+      <div class="selecao-qty-stepper">
+        <button type="button" data-qty-action="dec" aria-label="Diminuir quantidade">−</button>
+        <span class="selecao-qty-value">${c.qty}</span>
+        <button type="button" data-qty-action="inc" aria-label="Aumentar quantidade">+</button>
       </div>
-    `;
-  }).join('');
-  
-  return `<div class="groups-list">${html}</div>`;
+      <button type="button" id="selecaoPickerAdd">Adicionar à Minha Seleção</button>
+    </div>
+  </div>`;
+  host.innerHTML = html;
+  const pn = document.getElementById('priceNow');
+  if(pn) pn.textContent = r.price ? fmtBRL(r.price) : 'Consulte';
+  const img = productPageEl.querySelector('.viewFoto');
+  const src = r.v.image || c.p.image;
+  if(img && src && img.getAttribute('src')!==src) img.setAttribute('src', src);
+}
+function kitContentBlock(p){
+  if(p.category!=='Kits') return '';
+  const items = kitContentItems(p);
+  if(!items.length) return '';
+  return `<div class="aboutBox"><h2 class="variationsTitle">Conteúdo do kit</h2><ul class="kitList">${items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></div>`;
 }
 
-function availabilityBlock(p){
-  const mountOptions = getMountOptions(p);
-  const optionRow = mountOptions.length ? `<div class="availabilityRow"><b>Opções</b><div class="optionPills">${mountOptions.map(o=>`<span>${esc(o)}</span>`).join('')}</div></div>` : '';
-  const hasColors = p.category === 'Chumbadas' || (p.category === 'Jig Heads' && p.variants.some(v => v.opts.some(o => o.name === 'Cor' && o.value !== 'Natural')));
-  return hasColors ? `<div class="availability">
-    <div class="availabilityRow"><b>Cores</b><div class="swatches">${getLeadColors(p).map(c=>`<span class="swatch" style="--swatch:${c.color}">${esc(c.name)}</span>`).join('')}</div></div>
-    ${p.category === 'Chumbadas' ? optionRow : ''}
-  </div>` : '';
-}
 function priceBlock(p){
   const prices = p.variants.map(v => {
     if (!v.price) return null;
@@ -595,24 +573,10 @@ function productPageHTML(p){
       <div class="productInfo">
         <span class="badge">${esc(p.category)}</span>
         <h1>${esc(p.title)}</h1>
-        <div class="varcount">${p.variantCount} variaç${p.variantCount===1?'ão':'ões'} disponíve${p.variantCount===1?'l':'is'}</div>
-        ${priceBlock(p)}
-        ${descText(p)?`<p class="desc">${esc(descText(p))}</p>`:''}
-        ${availabilityBlock(p)}
-        <h2 class="variationsTitle">Todas as variações</h2>
-        <p class="selecao-hint">Clique numa variação para adicionar à Minha Seleção.</p>
-        ${variationList(p)}
-        <div id="selecaoPicker" class="selecao-picker" style="display:none">
-          <div class="selecao-picker-label"></div>
-          <div class="selecao-picker-controls">
-            <div class="selecao-qty-stepper">
-              <button type="button" data-qty-action="dec" aria-label="Diminuir quantidade">−</button>
-              <span class="selecao-qty-value">1</span>
-              <button type="button" data-qty-action="inc" aria-label="Aumentar quantidade">+</button>
-            </div>
-            <button type="button" id="selecaoPickerAdd">Adicionar à Minha Seleção</button>
-          </div>
-        </div>
+        ${SHOW_PRICE?`<div class="price-row"><span class="price-tag" id="priceNow"></span></div>`:''}
+        <div id="cfg" class="cfg"></div>
+        ${kitContentBlock(p)}
+        ${descText(p)?`<div class="aboutBox"><h2 class="variationsTitle">Sobre o produto</h2><p class="desc">${esc(descText(p))}</p></div>`:''}
       </div>
     </div>
     <a class="btn backBtn" href="#">← Voltar ao catálogo</a>
@@ -650,13 +614,6 @@ function showCatalog(){
 }
 
 let currentProduct = null;
-let selecaoQty = 1;
-
-function updateSelecaoQtyDisplay() {
-  const el = productPageEl.querySelector('.selecao-qty-value');
-  if (el) el.textContent = selecaoQty;
-}
-
 productPageEl.addEventListener('click', function (e) {
   const vbtn = e.target.closest('.viewBtn');
   if (vbtn && currentProduct) {
@@ -680,44 +637,30 @@ productPageEl.addEventListener('click', function (e) {
     }
     return;
   }
-  const optionBtn = e.target.closest('.selecao-option');
-  if (optionBtn) {
-    productPageEl.querySelectorAll('.selecao-option.active').forEach(el => el.classList.remove('active'));
-    optionBtn.classList.add('active');
-    const picker = productPageEl.querySelector('#selecaoPicker');
-    if (picker) {
-      picker.dataset.sku = optionBtn.dataset.sku || '';
-      picker.dataset.price = optionBtn.dataset.price || '0';
-      picker.dataset.label = optionBtn.dataset.label || '';
-      picker.querySelector('.selecao-picker-label').textContent = optionBtn.dataset.label || '';
-      picker.style.display = 'flex';
-      selecaoQty = 1;
-      updateSelecaoQtyDisplay();
-    }
-    return;
-  }
-
+  const optBtn = e.target.closest('.opt');
+  if (optBtn && cfg) { pick(cfg, optBtn.dataset.dim, optBtn.dataset.val); renderCfg(); return; }
   const qtyBtn = e.target.closest('[data-qty-action]');
-  if (qtyBtn) {
-    selecaoQty = qtyBtn.dataset.qtyAction === 'inc' ? selecaoQty + 1 : Math.max(1, selecaoQty - 1);
-    updateSelecaoQtyDisplay();
+  if (qtyBtn && cfg) {
+    cfg.qty = qtyBtn.dataset.qtyAction === 'inc' ? cfg.qty + 1 : Math.max(1, cfg.qty - 1);
+    const el = productPageEl.querySelector('.selecao-qty-value'); if (el) el.textContent = cfg.qty;
     return;
   }
-
   const addBtn = e.target.closest('#selecaoPickerAdd');
-  if (addBtn && window.MinhaSelecao && currentProduct) {
-    const picker = productPageEl.querySelector('#selecaoPicker');
-    const priceNum = Number(picker.dataset.price) || 0;
-    if (!priceNum) return;
-    window.MinhaSelecao.addItem({
+  if (addBtn && cfg && window.MinhaSelecao && currentProduct) {
+    const r = cfg.variant;
+    if (SHOW_PRICE && !r.price) return;
+    const item = {
       catalog: 'chumbadas',
       productId: currentProduct.handle,
       name: currentProduct.title,
-      sku: picker.dataset.sku || null,
-      variant: picker.dataset.label || '',
-      qty: selecaoQty,
-      unitPrice: priceNum,
-    });
+      sku: r.v.sku || null,
+      variant: cfgLabel(cfg),
+      qty: cfg.qty,
+    };
+    if (SHOW_PRICE) item.unitPrice = r.price;
+    window.MinhaSelecao.addItem(item);
+    addBtn.classList.add('done'); addBtn.textContent = 'Adicionado ✓';
+    setTimeout(() => { addBtn.classList.remove('done'); addBtn.textContent = 'Adicionar à Minha Seleção'; }, 1400);
   }
 });
 
@@ -729,6 +672,7 @@ function showProduct(handle){
   toolbarEl.style.display = 'none';
   catalogoEl.style.display = 'none';
   productPageEl.innerHTML = productPageHTML(p);
+  cfg = buildConfig(p); renderCfg();
   productPageEl.style.display = '';
   document.title = p.title + ' | Chumbada Oficial';
   window.scrollTo(0, 0);
