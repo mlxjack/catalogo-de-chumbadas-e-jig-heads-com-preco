@@ -113,7 +113,18 @@ button.group-pill.selecao-option{width:auto;text-align:center}
 .variationsTitle{font-size:18px;margin:26px 0 12px;letter-spacing:-.02em}
 .productPage .tableWrap{max-height:none}
 .backBtn{margin-top:34px}
-@media(max-width:860px){.productGrid{grid-template-columns:1fr}.productImage{position:static;min-height:280px}}
+@media(max-width:860px){.productGrid{grid-template-columns:1fr}.productImage{position:relative;top:0;min-height:280px}}
+.badge3d{position:absolute;top:12px;left:12px;background:var(--dark);color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:1000;letter-spacing:.06em;z-index:1;display:flex;align-items:center;gap:4px}
+.badge3d:before{content:"◆";color:var(--orange)}
+.viewToggle{display:flex;gap:8px;position:absolute;top:16px;left:16px;z-index:2}
+.viewToggle button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-weight:900;font-size:12px;cursor:pointer;color:#24303a}
+.viewToggle button svg{flex:none}
+.viewToggle button.active{background:var(--dark);border-color:var(--dark);color:#fff}
+.viewToggle .btn3d{background:var(--orange);border-color:var(--orange);color:#111}
+.viewToggle .btn3d.active{background:var(--dark);border-color:var(--dark);color:#fff}
+.productImage3d{display:none;width:100%;min-height:390px;height:420px;border-radius:20px;overflow:hidden;background:#1c232c;position:relative}
+.productImage3d model-viewer{width:100%;height:100%;--poster-color:transparent}
+.productImage3d .arBtn{position:absolute;bottom:14px;right:14px;background:var(--orange);color:#111;border:none;border-radius:999px;padding:10px 16px;font-weight:1000;font-size:13px;cursor:pointer;z-index:2}
 </style>
 <script src="https://selecao.chumbada.com.br/client.js" defer></script>
 </head>
@@ -200,6 +211,39 @@ const MOUNT_OPTION_OVERRIDES = [
 ];
 
 
+const MODELS_3D_BASE = 'https://chumbada-modelos-3d.chumbada-oficial.workers.dev/';
+const MODELS_3D = {"chumbada-aero-natural":{"gltf":"models/aero-original/model.gltf","usdz":"models/aero-original/model.usdz","bbox_mm":[19.32,91.02,19.32]},"chumbada-ancora-natural":{"gltf":"models/ancora-carlos-lira-130g/model.gltf","usdz":"models/ancora-carlos-lira-130g/model.usdz","bbox_mm":[40.62,68.49,34.22]},"chumbada-pertinax-natural":{"gltf":"models/ancora-novo-01-130g/model.gltf","usdz":"models/ancora-novo-01-130g/model.usdz","bbox_mm":[36.52,45.66,42.39]},"chumbada-mega-bat-natural":{"gltf":"models/ancora-novo-02-130g/model.gltf","usdz":"models/ancora-novo-02-130g/model.usdz","bbox_mm":[44.3,36.39,35.53]},"chumbada-jet-pack-natural":{"gltf":"models/ancora-novo-03-130g/model.gltf","usdz":"models/ancora-novo-03-130g/model.usdz","bbox_mm":[71.49,42.13,24.36]},"chumbada-aquazoom-natural":{"gltf":"models/aquazoom-135g/model.gltf","usdz":"models/aquazoom-135g/model.usdz","bbox_mm":[19.95,87.01,20.42]},"chumbada-bank-natural":{"gltf":"models/bank-14g/model.gltf","usdz":"models/bank-14g/model.usdz","bbox_mm":[32.38,11.25,10.16]},"chumbada-barata-natural":{"gltf":"models/barata-20g/model.gltf","usdz":"models/barata-20g/model.usdz","bbox_mm":[28.06,10.2,15.81]},"chumbada-belga-natural":{"gltf":"models/belga-125g/model.gltf","usdz":"models/belga-125g/model.usdz","bbox_mm":[21.16,60.73,21.12]},"chumbada-bico-de-pato-natural":{"gltf":"models/bico-de-pato-110g/model.gltf","usdz":"models/bico-de-pato-110g/model.usdz","bbox_mm":[23.19,71.92,18.24]},"chumbada-bico-de-pato-redondo":{"gltf":"models/bico-de-pato-redondo-80g/model.gltf","usdz":"models/bico-de-pato-redondo-80g/model.usdz","bbox_mm":[19.71,58.43,19.75]},"chumbada-bola-furada-natural":{"gltf":"models/bola-furada-30g/model.gltf","usdz":"models/bola-furada-30g/model.usdz","bbox_mm":[17.46,17.46,17.39]},"chumbada-golfe":{"gltf":"models/bola-golfe-80g/model.gltf","usdz":"models/bola-golfe-80g/model.usdz","bbox_mm":[25.29,24.26,24.14]},"chumbada-bola-guiada-natural":{"gltf":"models/bola-guiada-120g/model.gltf","usdz":"models/bola-guiada-120g/model.usdz","bbox_mm":[25.62,32.02,25.62]},"chumbada-bullet-natural":{"gltf":"models/bullet-10g/model.gltf","usdz":"models/bullet-10g/model.usdz","bbox_mm":[9.09,18.79,9.09]},"chumbada-carambola-sem-cauda-natural":{"gltf":"models/carambola-120g/model.gltf","usdz":"models/carambola-120g/model.usdz","bbox_mm":[27.53,46.25,24.12]},"chumbada-cone-natural":{"gltf":"models/cone-145g/model.gltf","usdz":"models/cone-145g/model.usdz","bbox_mm":[29.15,51.62,29.15]},"chumbada-cone-bomba-natural":{"gltf":"models/cone-bomba-long-casting-140g/model.gltf","usdz":"models/cone-bomba-long-casting-140g/model.usdz","bbox_mm":[20.18,76.91,20.18]},"chumbada-down-shot-natural":{"gltf":"models/down-shot-8g/model.gltf","usdz":"models/down-shot-8g/model.usdz","bbox_mm":[11.2,11.2,11.2]},"chumbada-downrigger-natural":{"gltf":"models/downrigger-ball-2000g-reparado/model.gltf","usdz":"models/downrigger-ball-2000g-reparado/model.usdz","bbox_mm":[111.62,67.12,72.29]},"chumbada-foguete":{"gltf":"models/foguete-80g/model.gltf","usdz":"models/foguete-80g/model.usdz","bbox_mm":[16.9,53.73,16.9]},"chumbada-gota-sem-cauda-natural":{"gltf":"models/gota-90g/model.gltf","usdz":"models/gota-90g/model.usdz","bbox_mm":[21.87,40.06,21.88]},"chumbada-gota-lancamento-limitado-natural":{"gltf":"models/gota-bomber-190g/model.gltf","usdz":"models/gota-bomber-190g/model.usdz","bbox_mm":[25.3,59.17,25.26]},"chumbada-pargueira-missil-natural":{"gltf":"models/missil-5000g/model.gltf","usdz":"models/missil-5000g/model.usdz","bbox_mm":[74.13,201.41,74.13]},"chumbada-moskit-natural":{"gltf":"models/moskit-140g/model.gltf","usdz":"models/moskit-140g/model.usdz","bbox_mm":[17.13,81.6,17.14]},"chumbada-oliva-natural":{"gltf":"models/oliva-furada-60g/model.gltf","usdz":"models/oliva-furada-60g/model.usdz","bbox_mm":[18.79,33.33,18.78]},"chumbada-pargueira-speedy-natural":{"gltf":"models/pargueira-2000g/model.gltf","usdz":"models/pargueira-2000g/model.usdz","bbox_mm":[49.98,176.0,56.19]},"chumbada-piao-natural":{"gltf":"models/piao-90g/model.gltf","usdz":"models/piao-90g/model.usdz","bbox_mm":[23.92,34.91,23.92]},"chumbada-pingo-de-secao-quadrada-natural":{"gltf":"models/pingo-secao-quadrada-120g/model.gltf","usdz":"models/pingo-secao-quadrada-120g/model.usdz","bbox_mm":[20.78,58.24,20.78]},"chumbada-piramide-natural":{"gltf":"models/piramide-110g/model.gltf","usdz":"models/piramide-110g/model.usdz","bbox_mm":[25.63,43.76,25.63]},"chumbada-piramide-furada-natural":{"gltf":"models/piramide-2018-45g/model.gltf","usdz":"models/piramide-2018-45g/model.usdz","bbox_mm":[25.46,31.88,25.3]},"chumbada-piramide-chata-com-olhal-duplo-natural":{"gltf":"models/piramide-chata-100g/model.gltf","usdz":"models/piramide-chata-100g/model.usdz","bbox_mm":[35.25,53.57,22.47]},"chumbada-piramide-rebaixada-natural":{"gltf":"models/piramide-chata-rebaixada-150g/model.gltf","usdz":"models/piramide-chata-rebaixada-150g/model.usdz","bbox_mm":[28.8,28.8,29.35]},"chumbada-piramide-diamante":{"gltf":"models/piramide-diamante-80g/model.gltf","usdz":"models/piramide-diamante-80g/model.usdz","bbox_mm":[21.24,49.48,21.24]},"chumbada-piramide-dupla":{"gltf":"models/piramide-dupla-80g/model.gltf","usdz":"models/piramide-dupla-80g/model.usdz","bbox_mm":[22.2,59.08,22.2]},"chumbada-piramide-x":{"gltf":"models/piramide-x-80g/model.gltf","usdz":"models/piramide-x-80g/model.usdz","bbox_mm":[25.65,46.87,25.65]},"chumbada-poita-natural":{"gltf":"models/poita-esferica-40g/model.gltf","usdz":"models/poita-esferica-40g/model.usdz","bbox_mm":[19.7,19.71,18.89]},"chumbada-portuguesa-natural":{"gltf":"models/portuguesa-120g/model.gltf","usdz":"models/portuguesa-120g/model.usdz","bbox_mm":[21.97,53.87,21.98]},"chumbada-sabonete-natural":{"gltf":"models/sabonete-v2-90g/model.gltf","usdz":"models/sabonete-v2-90g/model.usdz","bbox_mm":[24.21,40.34,15.13]},"chumbada-sino-natural":{"gltf":"models/sino-mr-145g/model.gltf","usdz":"models/sino-mr-145g/model.usdz","bbox_mm":[29.07,51.92,29.06]},"chumbada-torpedo-com-asa-natural":{"gltf":"models/torpedo-com-asa-135g/model.gltf","usdz":"models/torpedo-com-asa-135g/model.usdz","bbox_mm":[22.09,80.53,19.47]},"chumbada-torpedo-guiado-natural":{"gltf":"models/torpedo-guiado-135g/model.gltf","usdz":"models/torpedo-guiado-135g/model.usdz","bbox_mm":[18.96,85.7,18.94]},"chumbada-torpedo-long-casting-natural":{"gltf":"models/torpedo-long-casting-140g/model.gltf","usdz":"models/torpedo-long-casting-140g/model.usdz","bbox_mm":[20.55,64.75,20.55]},"chumbada-triangulo-natural":{"gltf":"models/triangulo-120g/model.gltf","usdz":"models/triangulo-120g/model.usdz","bbox_mm":[34.41,39.64,39.4]},"chumbada-tronco-de-cone-natural":{"gltf":"models/tronco-de-cone-130g/model.gltf","usdz":"models/tronco-de-cone-130g/model.usdz","bbox_mm":[27.84,31.81,27.88]}};
+let modelViewerLoadingPromise = null;
+function ensureModelViewerLoaded(){
+  if(window.customElements && customElements.get('model-viewer')) return Promise.resolve();
+  if(modelViewerLoadingPromise) return modelViewerLoadingPromise;
+  modelViewerLoadingPromise = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.type = 'module';
+    s.src = 'https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
+    s.onload = () => resolve();
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return modelViewerLoadingPromise;
+}
+function model3dHTML(p){
+  const m = MODELS_3D[p.handle];
+  if(!m) return '';
+  const [bx,by,bz] = m.bbox_mm;
+  const halfDiagM = Math.sqrt(bx*bx+by*by+bz*bz)/2/1000;
+  const radius = (halfDiagM / Math.sin(15*Math.PI/180)) * 1.25;
+  return `<model-viewer
+      src="${MODELS_3D_BASE}${m.gltf}"
+      ios-src="${MODELS_3D_BASE}${m.usdz}"
+      alt="${esc(p.title)} em 3D"
+      camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="1200"
+      exposure="1.3" environment-image="legacy" shadow-intensity="1.1"
+      camera-target="0m 0m 0m" camera-orbit="auto auto ${radius.toFixed(4)}m" field-of-view="30deg"
+      ar ar-modes="webxr scene-viewer quick-look">
+      <button slot="ar-button" class="arBtn" type="button">Ver em AR</button>
+    </model-viewer>`;
+}
 function esc(s){return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function normalizeText(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
 function getLeadColors(p){
@@ -421,8 +465,9 @@ function card(p){
   const id = p.category==='Jig Heads'?' id="jigheads"':'';
   const weights = p.weights && p.weights.length ? p.weights : (p.hooks || []);
   const href = `#/produto/${encodeURIComponent(p.handle)}`;
+  const has3d = !!MODELS_3D[p.handle];
   return `<article class="card"${id}>
-    <a class="thumb" href="${href}">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`:`<div class="noimg">Sem imagem</div>`}</a>
+    <a class="thumb" href="${href}">${has3d?'<span class="badge3d">3D</span>':''}${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`:`<div class="noimg">Sem imagem</div>`}</a>
     <div class="body">
       <div class="kicker"><span class="badge">${esc(p.category)}</span><span class="varcount">${p.variantCount} variações</span></div>
       <h3><a href="${href}">${esc(p.title)}</a></h3>
@@ -435,10 +480,15 @@ function card(p){
   </article>`;
 }
 function productPageHTML(p){
+  const has3d = !!MODELS_3D[p.handle];
   return `<div class="wrap">
     <nav class="breadcrumb"><a href="#">Início</a><span>/</span><span>${esc(p.category)}</span><span>/</span><span class="current">${esc(p.title)}</span></nav>
     <div class="productGrid">
-      <div class="productImage">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}">`:`<div class="noimg">Sem imagem</div>`}</div>
+      <div class="productImage">
+        ${has3d?`<div class="viewToggle"><button type="button" class="viewBtn active" data-view="foto">Foto</button><button type="button" class="viewBtn btn3d" data-view="3d"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>Ver em 3D</button></div>`:''}
+        ${p.image?`<img class="viewFoto" src="${esc(p.image)}" alt="${esc(p.title)}">`:`<div class="noimg">Sem imagem</div>`}
+        ${has3d?`<div class="productImage3d" id="view3dHost"></div>`:''}
+      </div>
       <div class="productInfo">
         <span class="badge">${esc(p.category)}</span>
         <h1>${esc(p.title)}</h1>
@@ -504,6 +554,28 @@ function updateSelecaoQtyDisplay() {
 }
 
 productPageEl.addEventListener('click', function (e) {
+  const vbtn = e.target.closest('.viewBtn');
+  if (vbtn && currentProduct) {
+    const view = vbtn.dataset.view;
+    productPageEl.querySelectorAll('.viewBtn').forEach(b => b.classList.toggle('active', b === vbtn));
+    const imgEl = productPageEl.querySelector('.viewFoto');
+    const host = document.getElementById('view3dHost');
+    if (view === '3d') {
+      if (imgEl) imgEl.style.display = 'none';
+      if (host) {
+        host.style.display = 'block';
+        if (!host.dataset.loaded) {
+          host.dataset.loaded = '1';
+          host.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#8a97a1;font-weight:900;">Carregando 3D…</div>';
+          ensureModelViewerLoaded().then(() => { host.innerHTML = model3dHTML(currentProduct); });
+        }
+      }
+    } else {
+      if (imgEl) imgEl.style.display = '';
+      if (host) host.style.display = 'none';
+    }
+    return;
+  }
   const optionBtn = e.target.closest('.selecao-option');
   if (optionBtn) {
     productPageEl.querySelectorAll('.selecao-option.active').forEach(el => el.classList.remove('active'));
